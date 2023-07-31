@@ -21,13 +21,13 @@ func ChunkUpload() httprouter.Handle {
 		index := r.Header.Get("X-Chunk-Index")    // 分片序号
 		// 判断请求头参数
 		if chunkHash == "" || fileHash == "" || index == "" {
-			utils.Error(w, utils.ErrCodeBadReqeust)
+			utils.Error(w, utils.ErrCodeBadReqeust, nil)
 			return
 		}
 
 		indexNum, err := strconv.Atoi(index)
 		if err != nil {
-			utils.Error(w, utils.ErrCodeBadReqeust)
+			utils.Error(w, utils.ErrCodeBadReqeust, nil)
 			return
 		}
 		//创建临时分片文件夹
@@ -43,7 +43,7 @@ func ChunkUpload() httprouter.Handle {
 		f, _, err := r.FormFile("file")
 		if err != nil {
 			log.Println("文件上传失败")
-			utils.Error(w, utils.ErrCodeBadReqeust)
+			utils.Error(w, utils.ErrCodeBadReqeust, nil)
 			return
 		}
 
@@ -51,7 +51,7 @@ func ChunkUpload() httprouter.Handle {
 		chunkfile, err := os.Create(dir + "/" + chunkHash)
 		if err != nil {
 			log.Println(err)
-			utils.Error(w, utils.ErrCodeSystemError)
+			utils.Error(w, utils.ErrCodeSystemError, nil)
 			return
 		}
 		var remove bool
@@ -69,19 +69,19 @@ func ChunkUpload() httprouter.Handle {
 		_, err = io.Copy(chunkfile, tee)
 		if err != nil {
 			log.Println(err)
-			utils.Error(w, utils.ErrCodeSystemError)
+			utils.Error(w, utils.ErrCodeSystemError, nil)
 			return
 		}
 		fhash := fmt.Sprintf("%x", hasher.Sum(nil))
 		if fhash != chunkHash {
 			log.Println("文件hash不一致（文件已损坏）")
 			// remove = true // hash验证失败，删除破损的文件
-			utils.Error(w, utils.ErrCodeHashNotMath)
+			utils.Error(w, utils.ErrCodeHashNotMath, nil)
 			return
 		}
 
 		// 验证正确，对数据进行缓存
 		cache.Set(fileHash, indexNum, chunkHash)
-		utils.Success(w)
+		utils.Success(w, nil)
 	}
 }

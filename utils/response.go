@@ -29,15 +29,19 @@ var errStatus = map[int]int{
 	ErrCodeSystemError: http.StatusInternalServerError,
 }
 
-func Success(w http.ResponseWriter) {
-	Error(w, ErrCodeOk)
+func Success(w http.ResponseWriter, data any) {
+	Error(w, ErrCodeOk, data)
 }
 
-func Error(w http.ResponseWriter, code int) {
-	b, _ := json.Marshal(map[string]any{
+func Error(w http.ResponseWriter, code int, data any) {
+	body := map[string]any{
 		"code":    code,
 		"message": errinfo[code],
-	})
+	}
+	if data != nil {
+		body["data"] = data
+	}
+	b, _ := json.Marshal(body)
 	w.WriteHeader(errStatus[code])
 	w.Write(b)
 }

@@ -12,11 +12,12 @@ import (
 func main() {
 	rootPath, _ := os.Getwd()
 	router := httprouter.New()
+	router.GET("/chunk-prepare/:hash", handlers.ChunkPrepare())
 	router.PUT("/chunk-upload", handlers.ChunkUpload())                  //分片上传路由
 	router.POST("/chunk-merge", handlers.ChunkMerge())                   // 文件合并路由
 	router.ServeFiles("/static/*filepath", http.Dir(rootPath+"/static")) // 文件服务
 	srv := http.Server{
-		Addr:    ":8080",
+		Addr:    ":8000",
 		Handler: router,
 	}
 	log.Println("listen at ", srv.Addr)

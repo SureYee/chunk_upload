@@ -30,14 +30,14 @@ func ChunkMerge() httprouter.Handle {
 		var req ChunkMergeReq
 		if err := json.Unmarshal(b, &req); err != nil {
 			log.Println(err)
-			utils.Error(w, utils.ErrCodeBadReqeust)
+			utils.Error(w, utils.ErrCodeBadReqeust, nil)
 			return
 		}
 		// 创建文件
 		f, err := os.Create("./uploads/" + req.Filename)
 		if err != nil {
 			log.Println(err)
-			utils.Error(w, utils.ErrCodeSystemError)
+			utils.Error(w, utils.ErrCodeSystemError, nil)
 			return
 		}
 		var remove bool
@@ -52,7 +52,7 @@ func ChunkMerge() httprouter.Handle {
 		if !ok {
 			log.Println("未找到文件上传信息")
 			remove = true
-			utils.Error(w, utils.ErrCodeBadReqeust)
+			utils.Error(w, utils.ErrCodeBadReqeust, nil)
 			return
 		}
 		hasher := md5.New()
@@ -63,7 +63,7 @@ func ChunkMerge() httprouter.Handle {
 			if !ok {
 				log.Println("未找到分片文件", i)
 				remove = true
-				utils.Error(w, utils.ErrCodeBadReqeust)
+				utils.Error(w, utils.ErrCodeBadReqeust, nil)
 				return
 			}
 			//根据分片hash值，从文件夹中获取文件内容
@@ -72,7 +72,7 @@ func ChunkMerge() httprouter.Handle {
 			if err != nil {
 				log.Println("打开分片文件失败", err)
 				remove = true
-				utils.Error(w, utils.ErrCodeSystemError)
+				utils.Error(w, utils.ErrCodeSystemError, nil)
 				return
 			}
 			//使用teereader，copy的时候同时copy到hash
@@ -82,7 +82,7 @@ func ChunkMerge() httprouter.Handle {
 			if err != nil {
 				log.Println(err)
 				remove = true
-				utils.Error(w, utils.ErrCodeSystemError)
+				utils.Error(w, utils.ErrCodeSystemError, nil)
 				return
 			}
 		}
@@ -90,10 +90,10 @@ func ChunkMerge() httprouter.Handle {
 		fhash := fmt.Sprintf("%x", hasher.Sum(nil))
 		if fhash != req.Hash {
 			remove = true
-			utils.Error(w, utils.ErrCodeHashNotMath)
+			utils.Error(w, utils.ErrCodeHashNotMath, nil)
 			return
 		}
 		cache.Del(req.Hash)
-		utils.Success(w)
+		utils.Success(w, nil)
 	}
 }
