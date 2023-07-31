@@ -59,14 +59,12 @@
             calculateMD5(chunk).then(chunkhash => {
                 const formData = new FormData();
                 formData.append('file', chunk);
+                formData.append('fileHash', filehash)
+                formData.append('chunkHash', chunkhash)
+                formData.append('chunkIndex', index)
                 fetch("/chunk-upload", {
                     method: "PUT",
-                    body: formData,
-                    headers: {
-                        "X-File-Hash": filehash,
-                        "X-Chunk-Hash": chunkhash,
-                        "X-Chunk-Index": index,
-                    }
+                    body: formData
                 }).then(response => {
                     console.log("chunk", index, "上传成功")
                     if (response.ok) {

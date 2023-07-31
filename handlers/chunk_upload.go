@@ -16,9 +16,15 @@ import (
 
 func ChunkUpload() httprouter.Handle {
 	return func(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
-		chunkHash := r.Header.Get("X-Chunk-Hash") // 分片数据hash
-		fileHash := r.Header.Get("X-File-Hash")   // 文件hash
-		index := r.Header.Get("X-Chunk-Index")    // 分片序号
+		if err := r.ParseMultipartForm(http.DefaultMaxHeaderBytes); err != nil {
+			utils.Error(w, utils.ErrCodeBadReqeust, nil)
+			return
+		}
+
+		chunkHash := r.Form.Get("chunkHash") // 分片数据hash
+		fileHash := r.Form.Get("fileHash")   // 文件hash
+		index := r.Form.Get("chunkIndex")    // 分片序号
+
 		// 判断请求头参数
 		if chunkHash == "" || fileHash == "" || index == "" {
 			utils.Error(w, utils.ErrCodeBadReqeust, nil)
